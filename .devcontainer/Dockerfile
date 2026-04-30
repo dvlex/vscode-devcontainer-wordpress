@@ -8,9 +8,9 @@ RUN a2enmod rewrite
 #Most of this comes directly from the WordPress docker image
 #We don't inherit from it becase it has a VOLUME that causes issues
 RUN set -eux; \
-	apt-get update; \
-	apt-get install -y --no-install-recommends ghostscript git less ssh-client mariadb-client nodejs npm; \
-	rm -rf /var/lib/apt/lists/*
+    apt-get update; \
+    apt-get install -y --no-install-recommends ghostscript git less ssh-client mariadb-client nodejs npm sudo; \
+    rm -rf /var/lib/apt/lists/*
 
 # install the PHP extensions, including XDebug
 RUN set -ex; \
@@ -66,7 +66,11 @@ ARG HOST_USER=vscode
 RUN groupadd -g ${HOST_GID} hostgroup || true && \
 	getent group ${HOST_GID} >/dev/null 2>&1 || groupadd -g ${HOST_GID} hostgroup || true && \
 	id -u ${HOST_USER} >/dev/null 2>&1 || useradd -m -u ${HOST_UID} -g ${HOST_GID} -s /bin/bash ${HOST_USER} || true && \
-	usermod -aG www-data ${HOST_USER} || true
+	usermod -aG www-data ${HOST_USER} || true && \
+	# add to sudo group and allow passwordless sudo for the host user
+	usermod -aG sudo ${HOST_USER} || true && \
+	echo "${HOST_USER} ALL=(ALL) NOPASSWD:ALL" > /etc/sudoers.d/host_user && \
+	chmod 0440 /etc/sudoers.d/host_user || true
 
 WORKDIR /var/www/html
 USER www-data
