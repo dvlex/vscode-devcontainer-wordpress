@@ -9,13 +9,8 @@ RUN a2enmod rewrite
 #We don't inherit from it becase it has a VOLUME that causes issues
 RUN set -eux; \
 	apt-get update; \
-	apt-get install -y --no-install-recommends ghostscript git less ssh-client mariadb-client; \
+	apt-get install -y --no-install-recommends ghostscript git less ssh-client mariadb-client nodejs npm; \
 	rm -rf /var/lib/apt/lists/*
-
-# install Node.js
-RUN curl -sL https://deb.nodesource.com/setup_12.x | bash - ; \
-	apt-get install -y nodejs; \
-	rm -rf /var/lib/apt/lists/*;
 
 # install the PHP extensions, including XDebug
 RUN set -ex; \
