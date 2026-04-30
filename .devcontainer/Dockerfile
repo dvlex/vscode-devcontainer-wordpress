@@ -1,4 +1,4 @@
-FROM php:7.4-apache
+FROM php:8.4-apache
 
 RUN mv "$PHP_INI_DIR/php.ini-development" "$PHP_INI_DIR/php.ini"
 # Enable .htaccess files & mod_rewrite
@@ -21,8 +21,9 @@ RUN set -ex; \
 		libmagickwand-dev \
 		libpng-dev \
 		libzip-dev \
-	; \
-	docker-php-ext-configure gd --with-freetype --with-jpeg; \
+	;
+
+RUN	docker-php-ext-configure gd --with-freetype --with-jpeg; \
 	docker-php-ext-install -j "$(nproc)" \
 		bcmath \
 		exif \
@@ -30,9 +31,10 @@ RUN set -ex; \
 		mysqli \
 		opcache \
 		zip \
-	; \
-	pecl install imagick-3.4.4; \
-  	pecl install xdebug-2.8.1; \
+	;
+
+RUN	pecl install imagick; \
+  	pecl install xdebug; \
 	docker-php-ext-enable imagick xdebug;\
 	rm -rf /var/lib/apt/lists/*
 
@@ -47,6 +49,8 @@ RUN { \
 	echo 'opcache.revalidate_freq=2'; \
 	echo 'opcache.fast_shutdown=1'; \
 } > /usr/local/etc/php/conf.d/opcache-recommended.ini
+
+RUN echo "memory_limit=512M" > /usr/local/etc/php/conf.d/memory-limit.ini;
 
 #install WP-CLI
 RUN curl -O https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar \
@@ -73,12 +77,13 @@ RUN groupadd -g ${HOST_GID} hostgroup || true && \
 	chmod 0440 /etc/sudoers.d/host_user || true
 
 WORKDIR /var/www/html
+
 USER www-data
 
 #Download WP
 RUN wp core download
 
-#add dirs for plugin and theme dev
+# add dirs for plugin and theme dev
 RUN mkdir -p /var/www/html/wp-content/plugins/plugin-dev; \
 	mkdir -p /var/www/html/wp-content/themes/theme-dev;
 
