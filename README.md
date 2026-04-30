@@ -1,27 +1,63 @@
 # vscode-devcontainer-wordpress
 
-This contains the configuration necessary for setting up WordPress development using VSCode Dev Containers.
-A MariaDB and WordPress devlopment container are started, and Wordpress is automatically installed and available at http://localhost:8080.
+This repository contains a ready-to-use WordPress development environment powered by VS Code Dev Containers.
+It starts WordPress and MariaDB automatically and makes the site available at http://localhost:8080.
 
-## Configuration
+## Requirements
 
-By default the container is configured for plugin development, but you can switch to theme development by changing the volume for the WordPress service in `docker-compose.yml`
+Before you begin, install these tools:
 
-WordPress settings can be configured in `.devcontainer/wp-setup.sh`, i.e. the site name, and admin user account details. You can also specify a space-separated list of WordPress plugins to automatically install as well. By setting `WP_RESET` to `true`, the container will rebuild the WordPress instalation from scratch every time it is loaded. 
+- [Visual Studio Code](https://code.visualstudio.com/)
+- [Docker](https://www.docker.com/products/docker-desktop/)
+- [Dev Containers extension](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers)
 
-## Data folder
+## Start The Environment
 
-Any `.sql` files placed `.devcontainer/data` will be automatically imported when your site is built (using `wp db import`). It is up to you to ensure table name prefixes will match (defualt is wp_).
+1. Open this folder in VS Code.
+2. Install the Dev Containers extension if you do not have it already.
+3. Run **Dev Containers: Reopen in Container** from the command palette, or use **Dev Containers: Rebuild Container** after making changes to the container configuration.
+4. Wait for the container to finish building and for the WordPress setup script to complete.
 
-Anything placed in the `plugins` folder (single files or folders) will be copied into the WordPress plugins folder and activated as a plugin. This enables things like defining custom post types relevant to your imported data set, but not part of the development process.
+Once the container is ready, WordPress should be running at:
+
+- http://localhost:8080
+- http://localhost:8080/wp-admin
+
+## WordPress Setup
+
+WordPress is installed automatically when the devcontainer starts.
+The initial site settings, admin user, and plugin list are defined in `.devcontainer/wp-setup.sh`.
+
+By default, this environment is configured for plugin development.
+If you want to work on a theme instead, change the mounted volume in `.devcontainer/docker-compose.yml`.
+
+## Reset Or Reload Data
+
+The `Makefile` includes a `reload` target that runs the WordPress setup script again:
+
+```bash
+make reload
+```
+
+Use it when you want to reset the local WordPress installation or re-apply your setup changes.
+
+Any `.sql` file placed in `.devcontainer/data` is imported during setup with `wp db import`, so you can seed the site with your own data.
+
+Files or folders placed in `.devcontainer/data/plugins` are copied into the WordPress plugins directory and activated automatically.
 
 ## Included Tools
 
-- XDebug, configured 
+- Xdebug
 - WP-CLI
 - Composer
-- NodeJS
-- PHP/WordPress extensions for VSCode (see `devconatainer.json`)
+- Node.js
+- MariaDB client tools
+- PHP and WordPress VS Code extensions
+
+## Notes
+
+- The environment is designed for local development, so it is safe to rebuild the container whenever you change the devcontainer configuration.
+- If you update `.devcontainer/wp-setup.sh`, run `make reload` to apply the changes without rebuilding the whole container.
 
 ## TODO
 
