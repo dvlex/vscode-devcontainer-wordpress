@@ -28,5 +28,6 @@
 
 	// Sets up WordPress on container start.
 	"postCreateCommand": ".devcontainer/wp-setup.sh",
-	"remoteUser": "vscode"
+	"remoteUser": "${localEnv:USER}",
+	"updateRemoteUserUID": true
 }

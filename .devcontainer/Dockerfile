@@ -58,9 +58,15 @@ WORKDIR /tmp
 RUN php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');" \
 		&& php composer-setup.php --quiet --install-dir=/usr/local/bin --filename=composer
 
-#add vscode user
-RUN useradd -ms /bin/bash vscode \
-		&& usermod -aG www-data vscode
+ARG HOST_UID=1000
+ARG HOST_GID=1000
+ARG HOST_USER=vscode
+
+#add user using host UID/GID and username when provided
+RUN groupadd -g ${HOST_GID} hostgroup || true && \
+	getent group ${HOST_GID} >/dev/null 2>&1 || groupadd -g ${HOST_GID} hostgroup || true && \
+	id -u ${HOST_USER} >/dev/null 2>&1 || useradd -m -u ${HOST_UID} -g ${HOST_GID} -s /bin/bash ${HOST_USER} || true && \
+	usermod -aG www-data ${HOST_USER} || true
 
 WORKDIR /var/www/html
 USER www-data
